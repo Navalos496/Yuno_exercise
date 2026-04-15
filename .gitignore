@@ -1,4 +1,8 @@
 .venv/
+
+# Cursor IDE — keep rules local only (not in remote repo)
+.cursor/
+
 __pycache__/
 *.py[cod]
 .pytest_cache/
