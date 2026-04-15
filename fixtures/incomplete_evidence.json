@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "environment": "collector-misfire-demo",
+    "evidence_source": "local_fixture: incomplete_evidence.json",
+    "collected_by": "simulated half-finished export"
+  },
+  "iam": {
+    "policies": [],
+    "users": null,
+    "root_mfa_enabled": null
+  },
+  "s3": { "buckets": [] },
+  "rds": { "instances": [] },
+  "cloudtrail": {
+    "regions_required": [],
+    "regions": {}
+  }
+}

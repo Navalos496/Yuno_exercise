@@ -1,0 +1,119 @@
+{
+  "summary": {
+    "warning": 2,
+    "non_compliant": 1
+  },
+  "findings": [
+    {
+      "control_id": "CC6.1",
+      "control_title": "Logical access to in-scope assets",
+      "tsc_category": "Security (Common Criteria)",
+      "status": "warning",
+      "plain_summary": "We look for obvious administrative wildcards, service-wide `s3:*` style shortcuts, and the few MFA facts the JSON snapshot actually contains. Anything missing is called out instead of silently passing.",
+      "evidence_redacted": {
+        "policy_count": 1,
+        "policy_names": [
+          "ReadOnlyDiscovery"
+        ],
+        "root_mfa_enabled": null,
+        "human_users_included": false,
+        "human_user_count": null
+      },
+      "blocking_findings": [],
+      "review_notes": [
+        "We did not get a yes/no for root MFA. I am not going to guess\u2014someone needs to paste the account summary screen or the API output that proves root is either protected or unused.",
+        "Human IAM users were not listed, so we cannot prove console MFA coverage. If you rely on SSO only, say that in the narrative and map evidence to IdP MFA instead."
+      ],
+      "recommendations": [
+        "Attach a short note for the QSA: who collects IAM/SSO evidence, how often, and where break-glass lives."
+      ],
+      "mapped_frameworks": {
+        "SOC2": [
+          "CC6.1"
+        ]
+      }
+    },
+    {
+      "control_id": "CC6.7",
+      "control_title": "Encryption of data at rest",
+      "tsc_category": "Security (Common Criteria)",
+      "status": "non_compliant",
+      "plain_summary": "S3 and RDS are stand-ins for 'data at rest'. We fail closed on missing encryption, nudge you on SSE-S3 vs KMS, and we refuse to invent a value when public access flags are absent.",
+      "evidence_redacted": {
+        "s3_bucket_count": 2,
+        "s3_buckets": [
+          {
+            "name": "yuno-staging-app-artifacts",
+            "encryption": {
+              "enabled": true,
+              "algorithm": "AES256"
+            }
+          },
+          {
+            "name": "yuno-staging-temp-uploads",
+            "encryption": {
+              "enabled": true,
+              "algorithm": "NONE"
+            }
+          }
+        ],
+        "s3_buckets_truncated": false,
+        "rds_count": 1,
+        "rds": [
+          {
+            "identifier": "staging-pg",
+            "storage_encrypted": true
+          }
+        ]
+      },
+      "blocking_findings": [
+        "Bucket `yuno-staging-temp-uploads` claims encryption is on, but the algorithm field is empty or NONE. That usually means the export script lied or the API response was trimmed."
+      ],
+      "review_notes": [
+        "Bucket `yuno-staging-app-artifacts` uses SSE-S3 (AES256). Plenty of audits accept it, but some teams prefer a KMS CMK so key rotation and access boundaries are clearer."
+      ],
+      "recommendations": [
+        "Turn on default encryption for every bucket; fix any bucket that still shows `encryption: false`.",
+        "Encrypt RDS storage and document which KMS key backs customer data.",
+        "Fill in missing JSON fields (public access blocks, algorithm) so the next run is decisive."
+      ],
+      "mapped_frameworks": {
+        "SOC2": [
+          "CC6.7"
+        ]
+      }
+    },
+    {
+      "control_id": "CC7.2",
+      "control_title": "Security monitoring and detection",
+      "tsc_category": "Security (Common Criteria)",
+      "status": "warning",
+      "plain_summary": "CloudTrail is our proxy for 'do we have an audit log of API activity'. If the JSON is thin, we say so instead of pretending everything is fine.",
+      "evidence_redacted": {
+        "regions_required": [
+          "us-east-1"
+        ],
+        "regions": {
+          "us-east-1": {
+            "enabled": true,
+            "is_logging": true
+          }
+        },
+        "multi_region_trail": null,
+        "log_archive_bucket_configured": null
+      },
+      "blocking_findings": [],
+      "review_notes": [
+        "No statement about centralized log storage. Not an automatic fail, yet auditors will ask for the bucket name, retention, and object lock details."
+      ],
+      "recommendations": [
+        "Add one paragraph to the audit packet: trail home region, log bucket ARN pattern, retention days, and who can edit bucket policies."
+      ],
+      "mapped_frameworks": {
+        "SOC2": [
+          "CC7.2"
+        ]
+      }
+    }
+  ]
+}

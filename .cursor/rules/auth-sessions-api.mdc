@@ -1,0 +1,15 @@
+---
+description: Authentication, authorization, sessions, and HTTP API security
+globs: "**/*auth*,**/middleware/**/*,**/session*,**/*login*,**/api/**/*,**/routes/**/*,**/*route*.ts,**/*route*.js"
+alwaysApply: false
+---
+
+# Auth, sessions & APIs
+
+- **Passwords**: Use established password hashing (e.g. Argon2/bcrypt via framework); proper salt/pepper per library docs.
+- **Sessions**: HttpOnly, Secure, SameSite; rotation on privilege change; clear logout.
+- **JWTs** (if used): Short TTL, explicit alg, validate `iss`/`aud`, no sensitive data in payload, refresh token handling hardened.
+- **APIs**: Strong typing/validation at boundary; rate limits; idempotency where needed; consistent error shape without leaking internals.
+- **CORS**: Narrow origins; avoid `*` with credentials.
+
+Default deny for new endpoints until authorization is explicit.

@@ -1,0 +1,23 @@
+---
+description: OWASP-aligned secure coding checklist for application code
+globs: "**/*.{ts,tsx,js,jsx,py,go,java,cs,php,rb}"
+alwaysApply: false
+---
+
+# OWASP-oriented secure coding
+
+When editing application code, actively check:
+
+| Area | Do |
+|------|----|
+| Injection | Parameterized queries; never concatenate untrusted input into SQL/OS/commands |
+| XSS | Context-appropriate encoding; avoid `dangerouslySetInnerHTML` unless strictly necessary and sanitized |
+| Authn/Authz | Verify server-side; session fixation/expiry; IDOR via object ownership checks |
+| CSRF | Tokens or same-site + framework defaults for state-changing requests |
+| SSRF | Allowlist hosts/schemes; block metadata IPs; no raw user URL fetches without gates |
+| Files | Validate type/size; store outside web root; random filenames |
+| Crypto | Use vetted libraries; no custom crypto; keys from KMS/HSM patterns—not env in repo |
+| Deserialization | Avoid unsafe pickle/YAML/`eval` on untrusted data |
+| Errors | Generic messages to users; details only in server logs without secrets |
+
+Prefer fixing root cause over adding brittle regex filters.

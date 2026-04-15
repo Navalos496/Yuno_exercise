@@ -1,0 +1,132 @@
+{
+  "summary": {
+    "non_compliant": 3
+  },
+  "findings": [
+    {
+      "control_id": "CC6.1",
+      "control_title": "Logical access to in-scope assets",
+      "tsc_category": "Security (Common Criteria)",
+      "status": "non_compliant",
+      "plain_summary": "We look for obvious administrative wildcards, service-wide `s3:*` style shortcuts, and the few MFA facts the JSON snapshot actually contains. Anything missing is called out instead of silently passing.",
+      "evidence_redacted": {
+        "policy_count": 2,
+        "policy_names": [
+          "AdminAccess",
+          "S3DangerousWildcard"
+        ],
+        "root_mfa_enabled": false,
+        "human_users_included": true,
+        "human_user_count": 1
+      },
+      "blocking_findings": [
+        "Policy 'AdminAccess': Allow grants Action * on Resource * (classic full-admin pattern).",
+        "Root user MFA is off. Auditors treat that as an easy win to fix.",
+        "User 'contractor-temp' is modeled as a person without MFA. Service accounts should live under `roles`, not this list."
+      ],
+      "review_notes": [
+        "Policy 'S3DangerousWildcard': Service-level wildcard action 's3:*' (many auditors ask for a narrower action list)."
+      ],
+      "recommendations": [
+        "Remove *:* style policies except true emergency roles, and guard them with approval + logging.",
+        "Turn MFA on for root and every human principal; enforce with `aws iam update-account-password-policy`.",
+        "Attach a short note for the QSA: who collects IAM/SSO evidence, how often, and where break-glass lives."
+      ],
+      "mapped_frameworks": {
+        "SOC2": [
+          "CC6.1"
+        ]
+      }
+    },
+    {
+      "control_id": "CC6.7",
+      "control_title": "Encryption of data at rest",
+      "tsc_category": "Security (Common Criteria)",
+      "status": "non_compliant",
+      "plain_summary": "S3 and RDS are stand-ins for 'data at rest'. We fail closed on missing encryption, nudge you on SSE-S3 vs KMS, and we refuse to invent a value when public access flags are absent.",
+      "evidence_redacted": {
+        "s3_bucket_count": 2,
+        "s3_buckets": [
+          {
+            "name": "yuno-prod-customer-data",
+            "encryption": {
+              "enabled": false
+            }
+          },
+          {
+            "name": "yuno-dev-logs",
+            "encryption": {
+              "enabled": false
+            }
+          }
+        ],
+        "s3_buckets_truncated": false,
+        "rds_count": 1,
+        "rds": [
+          {
+            "identifier": "legacy-mysql",
+            "storage_encrypted": false
+          }
+        ]
+      },
+      "blocking_findings": [
+        "Bucket `yuno-prod-customer-data` is not using default bucket encryption.",
+        "Bucket `yuno-prod-customer-data` does not have Block Public Access fully on. Even with encryption, public reads/writes are a separate nightmare.",
+        "Bucket `yuno-dev-logs` is not using default bucket encryption.",
+        "Bucket `yuno-dev-logs` does not have Block Public Access fully on. Even with encryption, public reads/writes are a separate nightmare.",
+        "RDS `legacy-mysql` is running without storage encryption."
+      ],
+      "review_notes": [],
+      "recommendations": [
+        "Turn on default encryption for every bucket; fix any bucket that still shows `encryption: false`.",
+        "Encrypt RDS storage and document which KMS key backs customer data."
+      ],
+      "mapped_frameworks": {
+        "SOC2": [
+          "CC6.7"
+        ]
+      }
+    },
+    {
+      "control_id": "CC7.2",
+      "control_title": "Security monitoring and detection",
+      "tsc_category": "Security (Common Criteria)",
+      "status": "non_compliant",
+      "plain_summary": "CloudTrail is our proxy for 'do we have an audit log of API activity'. If the JSON is thin, we say so instead of pretending everything is fine.",
+      "evidence_redacted": {
+        "regions_required": [
+          "us-east-1",
+          "eu-west-1"
+        ],
+        "regions": {
+          "us-east-1": {
+            "enabled": true,
+            "is_logging": false
+          },
+          "eu-west-1": {
+            "enabled": false,
+            "is_logging": false
+          }
+        },
+        "multi_region_trail": false,
+        "log_archive_bucket_configured": false
+      },
+      "blocking_findings": [
+        "Region `us-east-1` has a trail object, yet `is_logging` is false. That is the same as having a smoke detector with the battery pulled out.",
+        "Region `eu-west-1` does not show an enabled trail."
+      ],
+      "review_notes": [
+        "`log_archive_bucket_configured` is false. Logs might still exist, but you will be asked where they land and who can delete them."
+      ],
+      "recommendations": [
+        "Enable logging in every in-scope region, or ship an org trail with proof it covers the regions you promise customers.",
+        "Add one paragraph to the audit packet: trail home region, log bucket ARN pattern, retention days, and who can edit bucket policies."
+      ],
+      "mapped_frameworks": {
+        "SOC2": [
+          "CC7.2"
+        ]
+      }
+    }
+  ]
+}

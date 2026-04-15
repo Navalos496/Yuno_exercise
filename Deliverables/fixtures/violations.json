@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "environment": "yuno-legacy-audit-drill",
+    "evidence_source": "local_fixture: violations.json",
+    "collected_by": "compliance_evidence v0.1 (simulated API aggregation)"
+  },
+  "iam": {
+    "root_mfa_enabled": false,
+    "users": [
+      { "name": "contractor-temp", "mfa_enabled": false }
+    ],
+    "policies": [
+      {
+        "policy_name": "AdminAccess",
+        "attached_to": ["user/alice"],
+        "statement": [
+          {
+            "Effect": "Allow",
+            "Action": "*",
+            "Resource": "*"
+          }
+        ]
+      },
+      {
+        "policy_name": "S3DangerousWildcard",
+        "attached_to": ["role/legacy-batch"],
+        "statement": [
+          {
+            "Effect": "Allow",
+            "Action": "s3:*",
+            "Resource": "arn:aws:s3:::yuno-analytics/*"
+          }
+        ]
+      }
+    ]
+  },
+  "s3": {
+    "buckets": [
+      {
+        "name": "yuno-prod-customer-data",
+        "region": "us-east-1",
+        "encryption": { "enabled": false },
+        "public_access_blocked": false
+      },
+      {
+        "name": "yuno-dev-logs",
+        "region": "eu-west-1",
+        "encryption": { "enabled": false },
+        "public_access_blocked": false
+      }
+    ]
+  },
+  "rds": {
+    "instances": [
+      {
+        "identifier": "legacy-mysql",
+        "engine": "mysql",
+        "storage_encrypted": false
+      }
+    ]
+  },
+  "cloudtrail": {
+    "regions_required": ["us-east-1", "eu-west-1"],
+    "multi_region_trail": false,
+    "log_archive_bucket_configured": false,
+    "regions": {
+      "us-east-1": { "enabled": true, "is_logging": false },
+      "eu-west-1": { "enabled": false, "is_logging": false }
+    }
+  }
+}

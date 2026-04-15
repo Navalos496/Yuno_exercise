@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Nested repo inside Deliverables (optional local bundle); ship files only on GitHub
+Deliverables/.git/

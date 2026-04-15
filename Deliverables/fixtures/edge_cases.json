@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "environment": "yuno-staging-mixed-posture",
+    "evidence_source": "local_fixture: edge_cases.json",
+    "collected_by": "compliance_evidence v0.1 (simulated API aggregation)"
+  },
+  "iam": {
+    "policies": [
+      {
+        "policy_name": "ReadOnlyDiscovery",
+        "attached_to": ["role/security-scanner"],
+        "statement": [
+          {
+            "Effect": "Allow",
+            "Action": ["ec2:DescribeInstances", "s3:ListAllMyBuckets"],
+            "Resource": "*"
+          }
+        ]
+      }
+    ]
+  },
+  "s3": {
+    "buckets": [
+      {
+        "name": "yuno-staging-app-artifacts",
+        "region": "us-east-1",
+        "encryption": { "enabled": true, "algorithm": "AES256" },
+        "public_access_blocked": true
+      },
+      {
+        "name": "yuno-staging-temp-uploads",
+        "region": "us-east-1",
+        "encryption": { "enabled": true, "algorithm": "NONE" },
+        "public_access_blocked": true
+      }
+    ]
+  },
+  "rds": {
+    "instances": [
+      {
+        "identifier": "staging-pg",
+        "engine": "postgres",
+        "storage_encrypted": true,
+        "kms_key_id": "arn:aws:kms:us-east-1:123456789012:key/stg"
+      }
+    ]
+  },
+  "cloudtrail": {
+    "regions_required": ["us-east-1"],
+    "regions": {
+      "us-east-1": { "enabled": true, "is_logging": true }
+    }
+  }
+}

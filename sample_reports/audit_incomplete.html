@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SOC 2 evidence report (automated)</title>
+  <style>
+    body { font-family: Georgia, "Times New Roman", serif; line-height: 1.5; max-width: 960px; margin: 2rem auto; padding: 0 1rem; color: #111; }
+    h1, h2, h3, h4 { font-family: system-ui, sans-serif; line-height: 1.25; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-family: system-ui, sans-serif; }
+    th, td { border: 1px solid #bbb; padding: 0.5rem 0.6rem; text-align: left; vertical-align: top; }
+    th { width: 22%; background: #f4f4f4; }
+    .summary span { display: inline-block; margin-right: 1.25rem; font-family: system-ui, sans-serif; }
+    .card { border: 1px solid #ccc; border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; background: #fafafa; }
+    .meta { color: #444; margin-top: 0; font-family: system-ui, sans-serif; font-size: 0.95rem; }
+    .badge span { font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 4px; font-family: system-ui, sans-serif; }
+    .pass span { background: #d4edda; color: #155724; }
+    .fail span { background: #f8d7da; color: #721c24; }
+    .partial span { background: #fff3cd; color: #856404; }
+    .warn span { background: #cce5ff; color: #004085; }
+    .manual span { background: #e7d5f5; color: #4a235a; }
+    .unknown span { background: #e2e3e5; color: #383d41; }
+    pre.json { background: #111; color: #eaeaea; padding: 1rem; overflow: auto; border-radius: 6px; font-size: 0.85rem; }
+    code { font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>SOC 2 evidence report (automated)</h1>
+  <p><strong>Generated:</strong> 2026-04-15 14:11 UTC<br/>
+     <strong>Environment:</strong> collector-misfire-demo<br/>
+     <strong>Evidence source:</strong> local_fixture: incomplete_evidence.json</p>
+
+  <h2>Executive summary</h2>
+  <p>We evaluated <strong>3</strong> Security-style controls from the JSON snapshot.</p>
+  <p class="summary">
+    <span><strong>Pass:</strong> 0</span>
+    <span><strong>Fail:</strong> 0</span>
+    <span><strong>Partial:</strong> 0</span>
+    <span><strong>Review:</strong> 0</span>
+    <span><strong>Needs human:</strong> 3</span>
+  </p>
+  <p><em>Evidence sections are redacted so ARNs and stray emails do not travel in plaintext.</em></p>
+
+  <h2>Glossary</h2>
+  <table><tbody><tr><th>IAM</th><td>Gatekeeper for cloud APIs.</td></tr><tr><th>Least-privilege</th><td>Handing out the smallest permission set that still lets people work.</td></tr><tr><th>S3 bucket</th><td>Shared object storage—often customer files or backups.</td></tr><tr><th>RDS</th><td>Managed relational databases.</td></tr><tr><th>CloudTrail</th><td>API flight recorder.</td></tr><tr><th>Encryption at rest</th><td>Data stored encrypted on disk.</td></tr></tbody></table>
+
+  <h2>Per-control results</h2>
+  
+<section class="card">
+  <h3>CC6.1 — Logical access to in-scope assets</h3>
+  <p class="meta">Security (Common Criteria)</p>
+  <p class="badge manual"><span>NEEDS HUMAN</span> <code>manual_review</code></p>
+  <h4>Why this matters</h4>
+  <p>IAM is the front door to the cloud API. Auditors want to see that everyday access is narrow, privileged access is rare, and MFA exists for humans (or an IdP you can prove covers the same risk).</p>
+  <h4>What we checked</h4>
+  <p>We look for obvious administrative wildcards, service-wide `s3:*` style shortcuts, and the few MFA facts the JSON snapshot actually contains. Anything missing is called out instead of silently passing.</p>
+  <h4>Evidence excerpt (redacted)</h4>
+  <pre class="json">{
+  &quot;policy_count&quot;: 0,
+  &quot;policy_names&quot;: [],
+  &quot;root_mfa_enabled&quot;: null,
+  &quot;human_users_included&quot;: false,
+  &quot;human_user_count&quot;: null
+}</pre>
+  <h4>Mapped frameworks</h4><ul><li><strong>SOC2:</strong> CC6.1</li></ul>
+  <h4>Must fix</h4>
+  <p>None.</p>
+  <h4>Review queue</h4>
+  <ul><li>Snapshot did not include any IAM customer-managed policies. That is normal for tiny demos, but for an audit you still need to show how access is granted (inline policies, permission sets, or attached AWS managed policies gathered elsewhere).</li><li>We did not get a yes/no for root MFA. I am not going to guess—someone needs to paste the account summary screen or the API output that proves root is either protected or unused.</li><li>Human IAM users were not listed, so we cannot prove console MFA coverage. If you rely on SSO only, say that in the narrative and map evidence to IdP MFA instead.</li></ul>
+  <h4>What we would do next</h4>
+  <ul><li>Attach a short note for the QSA: who collects IAM/SSO evidence, how often, and where break-glass lives.</li></ul>
+</section>
+
+<section class="card">
+  <h3>CC6.7 — Encryption of data at rest</h3>
+  <p class="meta">Security (Common Criteria)</p>
+  <p class="badge manual"><span>NEEDS HUMAN</span> <code>manual_review</code></p>
+  <h4>Why this matters</h4>
+  <p>Disks walk away, buckets get mis-shared, and backups linger for years. Encryption at rest is the cheap insurance policy everyone expects to see switched on.</p>
+  <h4>What we checked</h4>
+  <p>S3 and RDS are stand-ins for &#x27;data at rest&#x27;. We fail closed on missing encryption, nudge you on SSE-S3 vs KMS, and we refuse to invent a value when public access flags are absent.</p>
+  <h4>Evidence excerpt (redacted)</h4>
+  <pre class="json">{
+  &quot;s3_bucket_count&quot;: 0,
+  &quot;s3_buckets&quot;: [],
+  &quot;s3_buckets_truncated&quot;: false,
+  &quot;rds_count&quot;: 0,
+  &quot;rds&quot;: []
+}</pre>
+  <h4>Mapped frameworks</h4><ul><li><strong>SOC2:</strong> CC6.7</li></ul>
+  <h4>Must fix</h4>
+  <p>None.</p>
+  <h4>Review queue</h4>
+  <ul><li>Neither S3 nor RDS objects were shipped in this file, so we cannot show encryption at rest for those services. That is not a pass—it means the story is unfinished unless other evidence exists.</li></ul>
+  <h4>What we would do next</h4>
+  <ul><li>Fill in missing JSON fields (public access blocks, algorithm) so the next run is decisive.</li></ul>
+</section>
+
+<section class="card">
+  <h3>CC7.2 — Security monitoring and detection</h3>
+  <p class="meta">Security (Common Criteria)</p>
+  <p class="badge manual"><span>NEEDS HUMAN</span> <code>manual_review</code></p>
+  <h4>Why this matters</h4>
+  <p>If nobody logged the API call, the investigation stops cold. CloudTrail (or an equivalent) is how you prove someone did—or did not—touch production settings.</p>
+  <h4>What we checked</h4>
+  <p>CloudTrail is our proxy for &#x27;do we have an audit log of API activity&#x27;. If the JSON is thin, we say so instead of pretending everything is fine.</p>
+  <h4>Evidence excerpt (redacted)</h4>
+  <pre class="json">{
+  &quot;regions_required&quot;: [],
+  &quot;regions&quot;: {},
+  &quot;multi_region_trail&quot;: null,
+  &quot;log_archive_bucket_configured&quot;: null
+}</pre>
+  <h4>Mapped frameworks</h4><ul><li><strong>SOC2:</strong> CC7.2</li></ul>
+  <h4>Must fix</h4>
+  <p>None.</p>
+  <h4>Review queue</h4>
+  <ul><li>CloudTrail section is basically empty. Before anyone calls this a pass, you need at least one region worth of `DescribeTrails` / `GetTrailStatus` output in the bundle.</li><li>No statement about centralized log storage. Not an automatic fail, yet auditors will ask for the bucket name, retention, and object lock details.</li></ul>
+  <h4>What we would do next</h4>
+  <ul><li>Add one paragraph to the audit packet: trail home region, log bucket ARN pattern, retention days, and who can edit bucket policies.</li></ul>
+</section>
+
+
+  <h2>Limitations</h2>
+  <p>This file proves what the JSON said at generation time. Type II work still needs history, sampling, and interviews.</p>
+</body>
+</html>
